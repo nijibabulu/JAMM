@@ -212,12 +212,7 @@ printf "Done!\n"
 printf "Processing sample files..."
 #load each chromosome from each sample file
 for i in $sdir/*.bed; do
-samplefile=$(basename $i)	
-	for f in $wdir/sizes.$ran/*; do
-		sizefile=$(basename $f)
-		chr=$(echo $sizefile | awk -F"." '{print $2}' | awk -F"." '{print $1}');
-		awk -v chr="$chr" -v ext="$wdir/samples.$ran/" -v samplefile="$samplefile" -F"\t" '$1 == chr { print $2"\t"$6 >> ext"sample."chr"."samplefile }' "$i" 
-	done
+    python3 $sPath/process_files.py $i sample $gsize $wdir/samples.$ran 
 done
 printf "Done!\n"
 
@@ -227,11 +222,7 @@ if [ $bdir != "None" ]; then
 printf "Processing control files..."
 cat $bdir/*.bed > $wdir/bkgd.$ran/ctrl.bed
 
-for f in $wdir/sizes.$ran/*; do
-	sizefile=$(basename $f)
-	chr=$(echo $sizefile | awk -F"." '{print $2}' | awk -F"." '{print $1}');
-	awk -v chr="$chr" -v ext="$wdir/bkgd.$ran/" -F"\t" '$1 == chr { print $2"\t"$6 >> ext"bkgd."chr".ctrl.bed" }' "$wdir/bkgd.$ran/ctrl.bed"
-done
+python3 $sPath/process_files.py $wdir/bkgd.$ran/ctrl.bed bkgd $gsize $wdir/bkgd.$ran/
 
 printf "Done!\n"
 fi
