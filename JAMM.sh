@@ -431,8 +431,11 @@ for f in $wdir/sizes.$ran/*; do #for each chromosome
 		for s in $wdir/samples.$ran/sample.$chr.*.bed; do #and for each sample file
 			samplefile=$(basename $s)
 			chr2=$(echo $samplefile | awk -F"." '{print $2}');
-			if [ $chr == $chr2 ] #belonging to this chromosome
+			if ! [ -s $s ] # no reads are present in this chromosome
 			then
+				echo "Missing reads in at least one replicate"
+				continue
+			else
 				samplelist="$samplelist,$wdir/samples.$ran/ext.$samplefile"
 				samplename=$(echo $samplefile | awk -F"." '{ print $3 }')
 				samplefilename=$(echo $samplefile | cut -d'.' -f 3-)
@@ -485,13 +488,18 @@ for f in $wdir/sizes.$ran/*; do #for each chromosome
 		samplelist=${samplelist#","}
 		frag=${frag#","}
 		
-		#call the peak calling R script
-		Rscript "$sPath/peakfinder.r" -sfile="$f" -chrcount="$counting" -bednames="$samplelist" -frag="$frag" -bkgd="$bkgdfile" -out="$wdir/peaks.$ran/" -clustnummer="$clustno" -resolution="$resol" -window="$window" -p="$cores" -bin="$binsize" -type="$type" -initModel="$initModel" -windowe="$windowe" -nreps="$nreps"
-		counting=$(($counting+1));
-		if [ -s "$wdir/peaks.$ran/$chr.peaks.bed" ]; then
-			cp "$wdir/peaks.$ran/$chr.peaks.bed" "$out/peaks/$chr.peaks.bed"
-			rm "$wdir/peaks.$ran/$chr.peaks.bed"
-		fi
+        if [ $bdir == "None" ] || [ -s $bkgdfile ]
+        then
+            #call the peak calling R script
+            Rscript "$sPath/peakfinder.r" -sfile="$f" -chrcount="$counting" -bednames="$samplelist" -frag="$frag" -bkgd="$bkgdfile" -out="$wdir/peaks.$ran/" -clustnummer="$clustno" -resolution="$resol" -window="$window" -p="$cores" -bin="$binsize" -type="$type" -initModel="$initModel" -windowe="$windowe" -nreps="$nreps"
+            counting=$(($counting+1));
+            if [ -s "$wdir/peaks.$ran/$chr.peaks.bed" ]; then
+                cp "$wdir/peaks.$ran/$chr.peaks.bed" "$out/peaks/$chr.peaks.bed"
+                rm "$wdir/peaks.$ran/$chr.peaks.bed"
+            fi
+        else
+            printf "No reads\n"
+        fi
 done
 counting=1;
 fi
@@ -518,8 +526,11 @@ for f in $wdir/sizes.$ran/*; do #for each chromosome
 	for s in $wdir/samples.$ran/sample.$chr.*.bed; do #and for each sample file
 		samplefile=$(basename $s)
 		chr2=$(echo $samplefile | awk -F"." '{print $2}');
-		if [ $chr == $chr2 ] #belonging to this chromosome
+		if ! [ -s $s ] # no reads are present in this chromosome
 		then
+			echo "Missing reads in at least one replicate"
+			continue
+		else
 			samplelist="$samplelist,$wdir/samples.$ran/$samplefile"
 			samplename=$(echo $samplefile | awk -F"." '{ print $3 }')
 			samplefilename=$(echo $samplefile | cut -d'.' -f 3-)
@@ -536,14 +547,19 @@ for f in $wdir/sizes.$ran/*; do #for each chromosome
 	#remove leading comma
 	samplelist=${samplelist#","}
 	frag=${frag#","}
-		
-	#call the peak calling R script
-	Rscript "$sPath/peakfinder.r" -sfile="$f" -chrcount="$counting" -bednames="$samplelist" -frag="NA" -bkgd=$bkgdfile -out="$wdir/peaks.$ran/" -clustnummer="$clustno" -resolution="$resol" -window="$window" -p="$cores" -bin="$binsize" -type="$type" -initModel="$initModel" -windowe="$windowe" -nreps="$nreps"
-	counting=$(($counting+1));
-	if [ -s "$wdir/peaks.$ran/$chr.peaks.bed" ]; then
-		cp "$wdir/peaks.$ran/$chr.peaks.bed" "$out/peaks/$chr.peaks.bed"
-		rm "$wdir/peaks.$ran/$chr.peaks.bed"
-	fi
+
+    if [ $bdir == "None" ] || [ -s $bkgdfile ]
+    then
+        #call the peak calling R script
+        Rscript "$sPath/peakfinder.r" -sfile="$f" -chrcount="$counting" -bednames="$samplelist" -frag="NA" -bkgd=$bkgdfile -out="$wdir/peaks.$ran/" -clustnummer="$clustno" -resolution="$resol" -window="$window" -p="$cores" -bin="$binsize" -type="$type" -initModel="$initModel" -windowe="$windowe" -nreps="$nreps"
+        counting=$(($counting+1));
+        if [ -s "$wdir/peaks.$ran/$chr.peaks.bed" ]; then
+            cp "$wdir/peaks.$ran/$chr.peaks.bed" "$out/peaks/$chr.peaks.bed"
+            rm "$wdir/peaks.$ran/$chr.peaks.bed"
+        fi
+    else
+        printf "No reads\n"
+    fi
 done
 counting=1;
 fi
