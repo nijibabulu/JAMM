@@ -312,7 +312,7 @@ smoothcounts = function(winStart, coffeeshopSud, numdup, counts, startlist) { #h
 cluster = function(model, sig, init, clustnummer, noise) { #helper function2
 	set.seed(samplingSeed)
 	noisy = sample(noise, length(sig[,1]), replace = TRUE)
-	clust = me(model, sig+noisy, init)
+	clust = me(data=sig+noisy, modelName=model, z=init)
 	bicc =  bic(model, clust$loglik, length(sig[,1]), length(sig[1,]), clustnummer)
 	out = list(bicc = bicc, param = clust$parameters)
 	return(out)
@@ -401,7 +401,7 @@ findpeak = function(winStart, coffeeshopSud, numdup, C, param, bkgd, resol, coun
 		noisy = sample(noise, rWinSizeTemp, replace = TRUE)
 				
 		########clustering START#######
-		clust = em(param$modelname, Rs+noisy, param$initparam) 		#clustering - take 1
+		clust = em(data=Rs+noisy, modelName=param$modelname, parameters=param$initparam) 		#clustering - take 1
 		clust$classification = map(clust$z)
 		if (numdup > 1) { #check replicates agree on clustering
 			cc = sum(diff(apply(clust$parameters$mean, 1, which.max)))
@@ -418,7 +418,7 @@ findpeak = function(winStart, coffeeshopSud, numdup, C, param, bkgd, resol, coun
 			set.seed(samplingSeed)
 			init = kmeans(Rs+noisy, clustnummer, nstart = 20)
 			init = unmap(init$cluster)
-			clust = me(param$modelname, Rs+noisy, init)
+			clust = me(data=Rs+noisy, modelName=param$modelname, z=init)
 			clust$classification = map(clust$z)
 			if (numdup > 1) { #check replicates agree on clustering
 				cc = sum(diff(apply(clust$parameters$mean, 1, which.max)))
