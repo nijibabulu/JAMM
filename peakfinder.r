@@ -1004,7 +1004,7 @@ if (cornum > 1) {
 } else {
 	peaks = lapply(coffeeshop[,1], findpeak, coffeeshop[,2], numdup, C, param, bkgd, resol, counts, noise, startlist = coffeeshop[,1], meanAdjust, clustnummer)
 }
-if (!(is.null(peaks))) { #any peaks discovered?
+if (!(is.null(peaks)) && any(sapply(peaks, length))) { #any peaks discovered?
 writethis = processPeaks(peaks)
 #=======================> DONE!
 
