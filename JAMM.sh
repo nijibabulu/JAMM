@@ -428,7 +428,7 @@ for f in $wdir/sizes.$ran/*; do #for each chromosome
 		printf "Chromosome $chr: "
 		
 		#list of sample bed files and fragment lengths
-		for s in $wdir/samples.$ran/*.bed; do #and for each sample file
+		for s in $wdir/samples.$ran/sample.$chr.*.bed; do #and for each sample file
 			samplefile=$(basename $s)
 			chr2=$(echo $samplefile | awk -F"." '{print $2}');
 			if [ $chr == $chr2 ] #belonging to this chromosome
@@ -515,7 +515,7 @@ for f in $wdir/sizes.$ran/*; do #for each chromosome
 	printf "Chromosome $chr: "
 		
 	#list of sample bed files and fragment lengths
-	for s in $wdir/samples.$ran/*.bed; do #and for each sample file
+	for s in $wdir/samples.$ran/sample.$chr.*.bed; do #and for each sample file
 		samplefile=$(basename $s)
 		chr2=$(echo $samplefile | awk -F"." '{print $2}');
 		if [ $chr == $chr2 ] #belonging to this chromosome
